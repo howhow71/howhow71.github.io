@@ -1,0 +1,243 @@
+<html ng-app="juneja">
+    <head>
+        	<!--CSS Stylesheets !-->
+        <link rel="stylesheet" type="text/css" href="projectlayout.css"> 
+		<link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"> 
+		<script type="text/javascript" src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+         <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.6/angular.min.js"></script>
+        <link rel="stylesheet" type="text/css" href="style.css"> </link>
+      <link rel="stylesheet" type="text/css" href="lib/blackboard.css"> </link>
+       
+        <script src="lib/rainbow-custom.min2.js"></script>
+        
+        <link href="lib/rainbow.css" rel="stylesheet" type="text/css">
+
+</head>
+
+
+<body>
+    <div id="container">
+    <ng-include src="'navbar.html'"></ng-include>
+    <div id="title">
+        <strong><h1>N-Gram Language Model</h1></strong>    
+    </div>
+    <div id="row">
+        <div id="summary" class="col-sm-6">
+            <div class="contentHeader">
+            <h2>Background</h2>
+            </div>
+            
+            <div class="content">
+          <p>  The goal of language modeling is to assign probabilities to a distribution of words. This project is an implementation of the N-Gram language model, frequently used in the field of natural language processing. The performance of N-Gram models can vary greatly depending on implementation decsions most notably on the smoothing techniques it uses.  Language modeling is critical to many applications:  </p>
+                <ul>
+                    <li class="list">Language Translation: What is the best possible translation of a given document? </li>
+                    <li class="list">Sentence correction. Ex: "I ate the desert" is technically correct english. But looking at sentence probabilities an application can flag it as a possible mistake. </li>
+                    <li class="list">Question Answering: Language models provide probabilities used in discovering question context.  </li>
+                
+                </ul>
+            </div>
+            
+            
+        <div class="contentHeader"><h2>The N-Gram Distribution<h2></div>
+        <div class="content"> 
+            <p>The N-Gram model breaks a sentence down into subsequences of length N. It computes the probability of each subsequence and combines them together using the chain rule to compute the sentence probability. If we are computing the probability of the sentence : "I ate the pizza" : </p>
+    
+            <p>\[\text{Unigram : P(I) * P(ate) * P(the) * P(pizza)}
+\]
+<script type="text/javascript" src="http://www.hostmath.com/Math/MathJax.js?config=OK"></script></p>
+            
+            <p>\[\text{Bigram : P(I | ate) * P(ate | the) * P(the | pizza)}
+\]
+<script type="text/javascript" src="http://www.hostmath.com/Math/MathJax.js?config=OK"></script></p>
+            
+            <p>\[\text{Trigram : P(the | I ate) * P(pizza |ate the) }
+\]
+<script type="text/javascript" src="http://www.hostmath.com/Math/MathJax.js?config=OK"></script></p>
+            
+             <p>The N-Gram model is built on the idea of the <strong>markov assumption.</strong>. A related problem in defining the probability of a sentence is identifing the probability of the next word in a sentence. Consider estimating the probability of the sentence <i>"It was the best of times, It was the worst of times"</i>, given that the previous words in the sentence are <i> "It was the best of times, it was the worst of" :</i></p>
+            
+            <p>\[\frac{Count(\text{It was the best of times it was the worst of)}}{Count(\text{It was the best of times it was the worst of times)}}\]
+<script type="text/javascript" src="http://www.hostmath.com/Math/MathJax.js?config=OK"></script></p>
+        
+        <p>Unfortunatly there are most likely going to be zero counts of that exact sentence in our training set. There are to many permutations of words in a reasonably sized corpus then we can train our model on.
+            The markov assumption estimates the next word in a sentence by looking at a smaller history. </p>
+            
+            <p>The intuition is that smaller subsets would be more frequent in our training set. We probably have counts for sequences like <i>It was</i> and <i>"the best"</i> in our training data which we can use to approximate the probability of the larger sentence. </p>
+            
+            <p>\[\text{Markov Assumption: } P(w_0w_1...w_n) \approx  \coprod_i^\ P(w_{i}|w_{i-k} ...w_{i-1})\]
+<script type="text/javascript" src="http://www.hostmath.com/Math/MathJax.js?config=OK"></script></p>
+        </div>
+        
+            <div class="contentHeader"><h3>Training the model</h3></div>
+            <div class="content"><p>We need to find the probabilities of the smaller N-Grams. We compute them by searching our training corpus. In the simplest case of unigram, we set the probability equal to the proportion of each word in the corpus. If the word I appeared 70 times in the training corpus, and our training corpus was 100 words long, P(I) would equal 70%. </p>
+                
+                
+            <p>For longer N-Grams, we need to compute the conditional probability of each prefix. Recall that given two events A and B: </p>
+          <p>  \[P(A|B)\ = \frac{P(A)} {P(A,B)}
+              \] </p>
+                
+            <p>In an n-gram model, the event A is the frequency of the next word occuring in the entire corpus, and B is the frequency of the entire gram occuring. Using proportions of relative frequency to estimate probability is called a <strong>Maximum Likelihood Estimate</strong> </p>
+                
+          <p>\[\text{Bigram Probability: }\frac{\text{Count(It was)}}{Count(\text{It)}} *\frac{\text{Count(was the)}}{Count(\text{was)}}  * ... * \frac{\text{Count(the best)}}{Count(\text{the)}}\]</p>
+
+            <p>\[\text{Trigram Probability: }\frac{\text{Count(It was the)}}{Count(\text{It was)}} *\frac{\text{Count(was the best)}}{Count(\text{was the)}}  * ... * \frac{\text{Count(worst of times)}}{Count(\text{worst of)}}\]</p>
+    
+                
+            <p>Conceptually, unigrams provide terrible estimates of sentences. Predicting the next word using a unigram model is the equivalent of just randomally picking words from a weighted distribution. Bigrams and Trigrams are able to pick out some sentence structure because they look at context formed from previous words. If the last word was a verb, then there is a high probability the model will chose a pronoun or noun next.  However picking very high order N-Grams can preform poorly due to lack of frequency counts in the training data.   </p>
+                    
+            </div>
+            
+            <div class="contentHeader"><h3>Unknown Words</h3></div>
+            <div class="content">
+           <p>What happens if we encounter a word that we have never seen in our training set. Lets assume the word <i>"was"</i> never occured in our training set, and we are evaluating this sentence on a bigram model :  </p>
+                
+                
+                     <p>\[\frac{\text{Count(It was)}}{Count(\text{It)}} *\frac{\text{Count(was the)}}{Count(\text{was)}}  * ... * \frac{\text{Count(the best)}}{Count(\text{the)}}\]</p>
+
+                <p>\[\color{red} {\frac{\text{Count(It was)}}{Count(\text{It)}} *\frac{\text{Count(was the)}}{0}  * ... * \frac{\text{Count(the best)}}{Count(\text{the)}}}\]</p>
+                
+                <p>We get a divide by zero error. Which conceptually makes sense. Without knowing the frequency of a particular N-Gram, we can make no logical guess as to the probability of the entire sentence. It's impossible. No way around it.</p>
+                
+            
+            </div>
+            <div class="contentHeader"><h2>Smoothing</h2></div>
+           <div class="content">
+            <p>Smoothing is the process of dealing with unknown words. It assigns a special token <strong>&lt;unk&gt;</strong> which represents any word not in the training set. The smoothing algorithm "steals" probability mass away from known words and assigns it to possible gram permutations containing the &lt;unk&gt; token. The idea of smoothing is much larger then the N-Gram model. It was originally a solution to the "sunrise problem", a thought experiment which questions the probability that the sun will rise tomorrow. Despite the ratio between the days the sun rose and total days of observation being 1, some probability must exist for an unknown event - but how should probability of unknown events be computed?   </p>
+            </div>
+            
+            <div id="contentHeader"><h3 class="contentHeader">Laplace/Add-One Smoothing</h3></div>
+            <div class="content">
+                <p>Add one smoothing redistributes the probability mass such that each permutation of words occur at least once. Imagine the following unigram counts in a training corpus: </p>
+            
+             <table class="table table-hover table-inverse">
+    <thead>
+      <tr>
+        <th>Token</th>
+        <th>Frequency</th>
+        <th>Probability</th>
+          <th>Smoothed Probability</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>It</td>
+        <td>2</td>
+        <td>20%</td>
+        <td>18.8%</td>
+      </tr>
+      <tr>
+        <td>the</td>
+        <td>2</td>
+        <td>20%</td>
+        <td>18.8%</td>
+      </tr>
+    <tr>
+        <td>best</td>
+        <td>1</td>
+        <td>10%</td>
+        <td>9%</td>
+      </tr>
+    <tr>
+        <td>of</td>
+        <td>2</td>
+        <td>20%</td>
+        <td>18.8%</td>
+      </tr>
+        <tr>
+        <td>times</td>
+        <td>2</td>
+        <td>20%</td>
+        <td>18.8%</td>
+      </tr>
+          
+        <tr>
+        <td>worse</td>
+        <td>1</td>
+        <td>10%</td>
+        <td>9%</td>
+      </tr>
+  
+        <tr>
+        <td>&lt;unk&gt;</td>
+        <td><strong>1</strong></td>
+        <td>-</td>
+        <td>9%</td>
+      </tr>    
+        
+            
+    </tbody>
+  </table>
+          
+            
+            <p>Add one smoothing is generally a poor choice because it takes away to much mass from words of high probability. In bigram and higher level models, much more mass is taken since there are |V|<sup>N</sup> different permutations of grams. The general formula for add one smoothing defined by: </p>
+            
+            
+            <p>\[P(w_i|w^{i-1}_{i-n+1}) = \frac{\delta + Count(w_{i-n+1}^{i})}{\delta*|V| + \sum_{w_i}^{} Count(w_{i-n+1}^{i})}\]</p>
+            <p>&delta; is just the multiplier. In the case of add one smoothing we pretend every token appeared one more times then it did so &delta; is 1. Similarly setting &delta; to n would ensure every token has a count of at least n. </p></div>
+            
+            
+            <div class="contentHeader"><h3>Good-Turing Smoothing</h3></div>
+            <div class="content"><p>The intuition behind Good-Turing is using the frequency of tokens we have seen once as an estimate to things we have never seen. When the algorithm beings, the probability of seeing an unknown word is large because it has not processed many words yet. As hundreds and thousands of words are consumed by the model, the chance of encountering a new word and a word which we have seen only once begin to converge to a similar value. Recall the reason add one was so poor is that it blindly stole the same proportion of mass from each token.  </p>
+            
+            <p>Good-Turing introduces a new notation N<sub>c</sub> , defined as the frequency of tokens that appear c times. For example, in the table above, N<sub>2</sub> is 4 because 4 words (in,the,of,times) all appear 2 times in the corpus. The first step of Good-Turing is to assign the maximum likelihood estimate of words that appear once to our unseen events (i.e N<sub>0</sub>):</p>
+                
+                <p>\[P_{Good-Turing}(N_0) = \frac{N_1}{N}\]</p>
+                
+            <p>We now have a probability of N<sub>0</sub> events, but we now need to re-estimate N<sub>1</sub> so that our probabilities add to one. This is done by adjusting maximum liklihood counts into the Good-Turing count denoted as c<sup>*</sup> :</p>
+                <p>\[c^* = \frac{(c+1)*N_{c+1}}{N_c}\]</p>
+                
+                <p>\[P_{Good-Turing}(N_{n\geq1}) = \frac{c^*}N\]</p>
+                
+                <p> Good-Turing smoothing comes in many variations and improves a lot on the simple add-one technique. The intuition of using counts of N<sub>1</sub> to estimate N<sub>0</sub> is used widely in other advanced smoothing algorithms.</p>
+            </div>
+              <div class="contentHeader"><h3>Jelinek-Mercer Smoothing<h3></div>
+                  <div class="content"><p>Jelinek-Mercer smoothing is built on the idea that sometimes using less context is better. High order n-grams achieve good performance only when we have strong counts of that particular n-gram in our training data. Consider a scenrio where we have the following counts: </p> 
+                  
+                  <table class="table table-hover table-inverse">
+                    <thead>
+                        <th>I</th>
+                        <th>I drank</th>
+                        <th>I drank &lt;unk&gt;</th>
+                      </thead>
+                     <tbody>
+                         <tr>
+                      <td>0.40</td>
+                      <td>0.15</td>
+                      <td>0.05</td>
+                         </tr>
+                     </tbody>
+                    </table>
+                      <p>We do not have great evidence for this particular trigram - should we really estimate it with our trigram model? Why not give weight to the bigram model which still has more context then just a unigram and a lot more evidence then our trigram. Jelinek-Mercer smoothing also called <i>interpolation</i> mixes the probability between various N-Gram models on a particular N-gram. </p>
+                      
+                     <p> \[P(w_i|w_{i-1}w_{2-1}) = \lambda_1 P(w_i|w_{i-1}w_{2-1}) +\lambda_2P(w_i|w_{i-1}) + \lambda_3P(w_i)\] 
+                      
+                      \[\sum_0^n\lambda_n= 1\]</p>
+                      
+                      <p>The &lambda; parameters define how much weight we give to each N-gram model. They are parameters which are usually learned by setting up experiments and validation sets. During this training process, the probability of the &lt;unk&gt; token is learned. The unigram probability of &lt;unk&gt; is the count ration between all unknown words in our validation set and the word count of the validation set.  </p>
+                      
+                      <p></p>
+                  </div>
+                  
+        </div>
+        </div>
+    </div>    
+    
+    
+    
+    
+    
+    
+    
+    
+    </div>
+    
+    
+
+</body>
+
+   
+      <script>
+         var mainApp = angular.module("juneja", []);
+    
+    </script>
+</html>

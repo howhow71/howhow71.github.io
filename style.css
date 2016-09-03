@@ -1,0 +1,98 @@
+	
+            .logo {
+               height: 60px;
+                max-width: 120px;
+                
+                
+            }
+            .content-row {
+                margin-bottom: 28px;
+            }
+            
+            #cbox {
+                border-left-width:5;
+                border-color: gray;
+                margin: 5px;
+                border-left-style: solid;
+                font-size: 17px;
+                
+            }
+.nav-tabs {
+    font-size: 25px;
+}
+a:link, a:hover, a:active { color: WindowText; }
+.jumbotron {
+	background-color: DarkSlateBlue;
+    background-color: slateblue;
+	margin-bottom: 0;
+	padding: 0.7em 0.6em;
+    color: black;
+    background-image: url(pictures/cover.jpg);
+    background-size: cover;
+    height: 80%;
+    
+  
+	}
+	.navbar-inverse {
+		background-color: DarkSlateBlue;
+	}
+	#headerPicture {
+		height: 29%;
+		margin-left: 20px;
+
+	}
+            
+            .media-heading {
+                font-weight: bold;
+                font-size: 20px;
+            }
+body {
+	background-color: azure;
+}
+#greeting {
+    vertical-align: bottom;
+    text-align: right;
+    font-family: cursive;
+    margin-right: 60px;
+    
+    
+
+}
+            .subheader {
+                color: white;
+                margin-right: 40px;
+                font-family: cursive;
+                font-size: 16px;
+                
+              
+            }
+
+
+#pills {
+	padding-top: 25px;
+
+}
+
+#synopsis {
+	padding-top: 30px;
+}
+
+#bioHeading {
+	text-align: center;
+}
+#bio {
+	margin-right: 9px;
+    margin-top: 12px;
+    font-size: 16px;
+}
+
+#bioTitle {
+    margin-top: 25px;
+    font-size: 25px;
+    text-align: center;
+}
+
+#content {
+        margin-left: 25px;
+        margin-top: 50px;
+     }

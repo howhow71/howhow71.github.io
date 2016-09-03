@@ -1,0 +1,88 @@
+ h3{
+        font-weight: bold;
+    }
+    #title {
+        margin-top: 50px;
+        text-align: center;
+        font-weight: 800;
+        margin-bottom: 60px;
+        
+    }
+    .contentHeader {
+        margin-left: 12px;
+        text-decoration: underline;
+        margin-top: 50px;
+    }
+    
+    .content {
+        margin-top: 20px;
+        margin-left = 100px;
+        margin-bottom: 40px;
+    }
+    p,ol,ul {
+        font-size: 18px;
+        margin-top: 180px;
+    }
+    .filename {
+        text-align: center;
+    }
+
+label {
+    text-align: center;
+    font-size:15px;
+    
+}
+    
+    
+button {
+    display: block !important; margin: 0 auto !important;
+}
+
+    
+    #text {
+        text-align: left;
+        align-content: left;
+    }
+.steps li {
+    margin-bottom: 19px;
+    margin-left: 9px;
+}
+plot {
+    margin-top: 25px;
+    margin-bottom: 15px;
+}
+
+.diagram {
+ 
+    align-content: center;
+    padding-top: 30px;
+    padding-bottom: 30px;
+    display: block;
+    margin: auto;
+}
+.navbar-nav-inverse li {
+    line-height: 150px;
+    height: 150px;
+    padding-top: 0;
+}
+
+.list {
+    margin-top: 22px;
+    margin-left: 28px; 
+}
+
+ol li {
+    margin-top: 8px;
+}
+
+ul li {
+   
+}
+
+.navel {
+
+}
+
+img {
+    margin-bottom: 35px;
+}

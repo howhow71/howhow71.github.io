@@ -1,0 +1,529 @@
+<html ng-app="juneja">
+    <head>
+        	<!--CSS Stylesheets !-->
+        <link rel="stylesheet" type="text/css" href="projectlayout.css"> 
+		<link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"> 
+		<script type="text/javascript" src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+         <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.6/angular.min.js"></script>
+        <link rel="stylesheet" type="text/css" href="style.css"> </link>
+      <link rel="stylesheet" type="text/css" href="lib/blackboard.css"> </link>
+       
+        <script src="lib/rainbow-custom.min2.js"></script>
+        
+        <link href="lib/rainbow.css" rel="stylesheet" type="text/css">
+
+</head>
+
+
+<body>
+     <ng-include src="'navbar.html'"></ng-include>
+<div id="title"><strong> <h1>Genetic Stegonograpy Algorithm</h1> </strong></div>
+     <div id="container">    
+                <div id = "row">
+                    <div id = "summary" class="col-sm-6">    
+                            <div class="contentHeader"><h2>Background</h2></div>
+                                <div class="content">
+                                    <p> Steganography is the science of hiding information. Unlike encryption which focuses on hiding the contents of information, steganography focuses on hiding the very existance of information. In many use cases, knowing that a message was even sent and the fact that it was encrypted is a big leak of information, even if the contents remain unbroken. Steganography see's its most common use today in digital water-marking. This technology helps confirm the authenticity of a file, (ex: checking if a file is pirated). </p>
+                                    <p>    
+                                    Steganographic algorithms work by embeding a message into a host file. Tampering any file requires flipping bits which in turn result in some noise being produced in the medium. A portion of a picture may become fuzzy or an audio file may have some white noise added to it. <b>The goal of this project is to design an algorithm that minimizes this noise. </b>
+                                    
+                                    </p>
+                        
+                                </div>
+                        
+                         <div class="contentHeader"><h2>Approach</h2></div>
+                                <div class="content">
+                                    <p> 
+                                        Finding the absolute minimal noise requires trying to flip every n-permutation of bits in a host file(n is the size of the message) . Since even a one minute of audio contains over 8 million bits, this quickly becomes computationally infeasable.
+                                    </p>
+                                    
+                                    <p> 
+                                        What we need is a search heuristic which intelligently searches the space of solutions and finds one that is reasonable. In the context of our problem, our algorithm wont produce the absolute minimum noise possible, but it will find a reasonably good solution, not take weeks to compute, and scale quickly - a pretty good tradeoff.
+                                    </p>
+                        
+                                    
+                                   
+                        
+                                </div>
+                    
+                                <div class="contentHeader"><h2>Genetic Algorithms</h2></div>
+                                    <div class="content">               
+                                        <p> 
+                                           Genetic algorithms are a subset of artificial intelligence. They attempt to optimize some cost function by combining subsets of solutions until convergence. The name "genetic" is derived from the algorithms paralel with evolution : </p>
+                                            <ol class="list">
+                                                <li>A set of N random solutions are initilized</li>
+                                                <li>The cost of each N solution is measured</li>
+                                                <li>The better solutions (i.e: lower cost) are randomally combined together to form new solutions</li>
+                                                <li>The solutions converge on a locally optimum value</li>
+                                        </ol>
+                                        <p> In the context of genetic algorithms: </p>
+                                            <ul class="list">
+                                                <li>Solutions are called chromosomes</li>
+                                                <li>A subset of a solution is called a gene</li>
+                                                <li>The cost of a function is referred to as its fitness</li>
+                                         
+                                            </ul>
+                                      
+
+                                            
+                                    </div>
+                        
+                        
+                            <div class="contentHeader"><h2>Defining a Fitness Function</h2></div>
+                                <div class="content">
+                                    <p>In our problem, each chromosome represents places in the host file to embedd a subset of information.  The noise produced will be the inverse of our fitness function; the chromosome that produces the least noise has the highest fitness. But we still need some mathamatical way to represent the noise produced. A common metric for measuring quality of a media file is the signal to noise ration (SNR) which is defined as:
+                                    
+                                    \[SNR = \frac{P_{signal}}{P_{noise}} = \frac{SignalRMS_{voltage}}{NoiseRMS_{voltage}}\]
+<script type="text/javascript" src="http://www.hostmath.com/Math/MathJax.js?config=OK"></script>
+                                   
+                                    Simply put, this function measures the noise in a medium by comparing the noisy file with the baseline file (before the message was added). Its commonly used in electrical engineering to measure how well a signal is transferred. The details can be found in the file StegoLib.py.
+                                    
+                                    </p> 
+                        
+                                                
+                                </div>
+                        
+                            <div class="contentHeader"><h2>Selecting Solutions</h2></div>
+                                <div class="content">
+                                 <p>   The heart of the algorithm is how chromosomes are selected. Recall that we start with N pairs of random solutions (generation 0). Our next step is to combine the best solutions. However:  </p>
+                                            <ul class="list">
+                                                <li>Simply picking a subset of the top solutions will result in very small search space. We will converge to quickly and at a very suboptimal solution</li>
+                                                
+                                                <li>Picking random solutions will result in randomness, i.e. no evolution</li>
+                                            </ul>
+                                    
+                                    <h3 class="contentHeader">Linear Rank Selection</h3>
+                                    <p>As the name implies, rank selection creates a <strong>weighted distribution</strong> of all chromosomes depending on their <strong>relative</strong> rank in a population. Imagine, a scenerio where the top chromosome has a fitness of 100X any other chromsome - it will most likely be selected all the time resulting in 0 variation. </p>
+                                    
+                                    <p>Rank selection would sort all the chromsomes in terms of fitness and assign probabilties depending on each chromosomes rank in that sorted list. This would result in the best chromosome having a slight edge over the second best chromosome which would have a slight edge over the N-2 chromosome etc.</p>
+                                    
+                                    <p>\[
+P(chromosome) = \frac{ 2 - SP + 2 * (SP - 1) * (Pos - 1) }{ (N - 1) }\]
+                                    <ol>
+                                        <li><strong>Pos</strong> is the chromsomes position in sorted list, indexed at 1</li>
+                                        <li><strong>N</strong> is number of total chromosomes</li>
+                                        <li><strong>SP</strong>is a value between 0 and 1 and is referred to as selective pressure. This value dictates how to distrubute weight across ranks. As SP tends towards 1, the algorithm allocates the majority of the probability for the highest ranking chromosomes, shrinking the search space. </li>
+                                    
+                                        
+                                    </ol>
+                                   <center><img id="rankImage" src="http://www.obitko.com/tutorials/genetic-algorithms/images/rank2.gif"></center> 
+                                    <label for="rankImage">The distribution of probabilities in rank selection are predictable before a simulation runs because absolute values do not matter.</label>
+                                    </p>
+                                    
+                                    
+                        
+                                </div>
+                    <div class="contentHeader"><h3>Roulette Wheel Selection</h3></div>
+             <div class="content">
+                    <p>Roulette wheel selection assigns a probability to each chromosome based off the proportion of total fitness that each chromosome has.   This requires summing the entire fitness of a population, and then computing each chromosomes proportion. </p> 
+                    <p>\[P(Chromosome)  = \frac{Chromosome.fit}{\sum_o^i Chromosome_{i}.fit}\]</p>
+                    
+                    <p> Unlike the linear rank selection algorithm it generally converges quicker and is heavily influenced by outliers as well as the spread of the distribution. </p>
+                    
+                    
+                    <p>The algorithm mimics the spinning of a roulette wheel. The chromosomes with the highest fitness occupy the largest share of the wheel.</p>
+                    
+                    <center><img src="http://188.94.193.164/scripting/figures/U7N-3VU-MMA_7f000001_12559235_47d4111f--01.jpg"></center>
+                    
+                   <p>To simulate the spinning of a roulette wheel, a pseudo-random threshold is picked. Random chromosomes are selected and their fitnesses are added together until the cumulated weight exceeds the threshold; the last chromosome is selected. Although all chromosomes have an equal probability of selection, the probability that a chromosome is the final one is directly proportional to its fitness, and thus simulates a weighted distribution. </p>
+                    
+         </div>
+                    
+                    
+                    <div class="contentHeader"><h2>Crossover</h2></div>
+                    
+                    <div class="content">
+                        <p>Crossover is the process of merging two chromosomes together. In the context of our stegonograpy problem, we are merging two lists which contain various points in a file. The goal is that the indicies which hide are less prone to noise are megered, leaving behind the more noisy indicies. My implementation takes a random point in the one chromosome and copies everything after that point into the second chromosome. I could have created the new chromosome through the process of setting many different breakpoints and shuffling. This would have increased diversity and expanded the search space, but I wanted to benchmark a simple crossover function first. Creating to much diversity in a simulation can lead to randomness.</p>
+                    </div>
+                        
+                    <div class="contentHeader"><h2>Results</h2></div>
+                        <p>Testing the algorithm multiple times on many different messages and .wav files shows that it is capable of finding locally optimal indicies. In this particular example, the algorithm was run for 20 generations, and the best value for each generation was strictly increasing most generations. After a certain point all the chromosomes became idenetical and it converged. If no evolution was taking place, we would expect the best values for each generation to be random with no clear pattern. </p>
+                    
+                        <center><img src="pictures/genetic_results.png" width="99%"></center>
+                    
+                    
+                    <div class="contentHeader"><h2>Reflection</h2></div>
+                    <div class="content">
+                        <p>The first few times I ran my algorithm, I thought I had a bug in my code because their was no improvement in generations - just randomness. I soon figured out that the parameters needed to be tuned to allow for evolution. After setting up a few experiments to tune the parameters, my algorithm began showing evolution. </p>
+                        
+                        <p> I chose to work on steganography because current algorithms are very easily broken using statistical analysis. A long running joke is the printing of Sony's keys across shirts. My project was a proof of concept, using one kind of evolutionary algorithm to show evolution across only one metric. Much more work needs to be done, specifically in comparing the data leakage from statistical tools across standard algorithms like least significant bit and lapalce transform. </p>
+                        
+                        
+                        
+                    </div>    
+                    
+                    </div>
+                    
+     
+                    
+             <div id="code" class="col-sm-6">
+            <div class="contentHeader">
+                
+                    <h2>Code</h2>
+                </div>
+            <h3 class="filename">RankSelection.py</h3>
+        <div>    
+
+           
+           
+           <pre><code data-language="Python">
+          
+import random as random
+import hashlib
+class RankSelection:
+	''' Algorithm for selecting an individuals based on its relative rank in a population.
+		Author: Ashish Juneja 
+		contact: asj33@pitt.edu
+	'''
+	def __init__(self,population):
+		self.population = population
+		self.rankedList = list()
+
+	def setup(self,population,SP):
+		''' Take the raw RMS-Power fitness, compute into a relative metric
+		   on how bad that RMS-Power fares against the rest of the population'''
+		
+		'''Sort list based on fitness'''
+		self.rankedList = sorted(population, key=lambda x: x.fitness, reverse=True)
+	
+		'''Compute fitness based on position in sorted array.'''	
+		N = len(self.rankedList)
+		self.sum = len(population)
+		sums = 0
+		for x in range (0,len(population)):
+			pos = N - x
+			self.rankedList[x].fitness = 2 - SP + 2 * (SP - 1) * (pos - 1) / (N - 1) 
+			sums = sums + self.rankedList[x].fitness
+			print(self.rankedList[x].fitness)
+
+	def select_individual(self,population):
+		'''Accumulate weight of random individuals till randomally selected threshold is reached.
+		   Higher weights have a higher weighted chance of being selected.'''
+		R = 0
+		N = len(self.rankedList)-1
+		R = R + random.uniform(0,N)
+		print("Threshold : " + str(R))
+		weight = 0
+		while weight < len(population):
+			random_index = random.randint(0,N)
+			weight = weight + self.rankedList[random_index].fitness
+		return self.rankedList[random_index]
+
+	def select_mate(self,population,partner):
+		'''Select another individual for first parent to mate with'''
+		mate = self.select_individual(population)
+		if(mate == partner):
+				self.select_mate(population,partner)	
+		return mate
+
+	def get_parents(self,population):
+		'''Select two different individuals for mating'''
+		parent_one = self.select_individual(population)
+		parent_two = self.select_mate(population,parent_one)
+		return parent_one,parent_two
+</code></pre>
+            </div>
+            
+          <h3 class="filename">RouletteWheel.py</h3>
+            <div>
+                <pre>
+                    <code data-language="Python">
+import random as random
+import hashlib
+class RouletteWheel:
+	''' Algorithm for selecting an individual from a population based on its absolute fitness in a population.
+		Author: Ashish Juneja 
+		contact: asj33@pitt.edu 
+	'''
+	def __init__(self,population):
+		self.population = population
+		self.sum = 0
+
+	def create_wheel(self,population):
+		S = self.sum_fitness(population)
+		self.sum = S
+		
+		
+	def sum_fitness(self,population):
+		''' Compute the total fitness in the population'''
+		sum = 0
+		for x in range(0,len(population)):
+			sum = sum + population[x].fitness
+		return sum
+
+	def get_parents(self,population):
+		'''Return two parents fit for mating'''
+		parent_one = self.select_individual(population)
+		parent_two = self.select_mate(population,parent_one)
+		return parent_one,parent_two
+
+
+	def select_individual(self,population):
+		''' Select an individual to mate using the RouletteWheel Algorithm.
+			The probability of selection is weighted off absolute fitness not relative fitness 
+			 as in RankSelection.'''
+		R = 0
+		R = R + random.uniform(0,self.sum)
+		weight = 0
+		for x in range(0,len(population)):
+			weight = weight + population[x].fitness	
+			if(weight >= R):
+				return population[x]
+		return -1
+
+	def select_mate(self,population,partner):
+		'''Select a partner for given parent'''
+		selected_parent = self.select_individual(population)
+		if(selected_parent == partner):
+			self.select_mate(population,partner)
+                    
+                    
+                    
+                    </code>
+                </pre>
+            
+            </div>
+            
+            
+            
+            
+<h3 class="filename">Stegolib.py</h3>
+            <div>
+                <pre>
+                    <code data-language="Python">
+import wave
+import binascii
+import audioop
+import numpy as np
+import random as random
+import struct
+import json
+from Chromosome import Chromosome as Chromosome
+class stegolib:
+	''' 
+		Handles low level I/O operation with .wav files.
+		Author:  Ashish Juneja
+		Contact: asj33@pitt.edu
+
+	'''
+
+	def decode_message(self,audio,key):
+		''' 
+		takes a string of hex values + the corresponding key 
+		and returns the ascii decoded message
+		'''
+		hex_msg = ""
+		for x in range (0, len(key)):
+			hex_msg = hex_msg + audio[int(key[x])]
+		decoded_msg = hex_msg.decode("hex")
+		print decoded_msg
+
+	def save_key(self,key,fname):
+		'''Dumps key in json format'''
+		with open(fname, 'w') as f:
+	  		json.dump(key, f, ensure_ascii=False)
+	  		print "\nThe file " + fname + ".key" + " has been saved.\n"
+	  		print "This file will help you recover your text" 
+
+		
+	def load_key(self,fname):
+		'''loads a file containing the stego key into a list structure '''
+		with open(fname,'r') as f:
+			x = json.load(f)
+			return x
+
+
+	def get_noise_fname(self,fname):
+		'''Returns the name of the edited audio file'''
+		token = fname.split('.')
+		noise_fname = token[0] + "_edited.wav"
+		return noise_fname
+
+
+	def encode(self,audio_hex,message,population):
+		'''Encodes hex data randomally into an audio file,.
+		   without any AI. Used as a baseline. '''
+		audio_list = list(audio_hex)
+		hidden_key = list()
+		offset = 0
+		for x in range (0 + offset,offset + len(population)): 
+			randhex = message[x-offset]
+			hidden_key.append(population[x]) 
+			audio_list[population[x]] = randhex
+		edited_audio =  ''.join(audio_list)
+		return edited_audio,hidden_key
+	
+	
+	def write_wave_file(self,fname,hexdata,parameters):
+		'''writes a wav file with the given filename, audio as a string of hex values
+		   and a tuple of parameters 
+		   (number of channels,samplewidth,framerate,number of frames,encoding type, encoding name)'''
+		noise_output = wave.open(fname,'w')
+		num_channels = parameters[0]
+		sample_width = parameters[1]
+		framerate = parameters[2]
+		number_frames = parameters[3]
+		compression_type = parameters[4]
+		compression_name = parameters[5]
+		noise_output.setparams((num_channels,sample_width,framerate,number_frames,compression_type,compression_name))
+		audio_bytes = bytearray.fromhex(hexdata)
+		noise_output.writeframes(audio_bytes)
+		noise_output.close()		
+	
+	
+	def open_audio_file(self,fname):
+		'''#eturns a string of bytes representing an audio file'''
+	        audio_file = wave.open(fname,'rb')
+	        print("Audio file opened....OK.\n")
+		return audio_file
+
+	
+	def get_audio_information(self,af):
+		'''Displays audio information about a given file'''
+		parameters = af.getparams()
+		print "Number of channels : " , parameters[0]
+		print "Sampwidth : " , parameters[1]
+		print "Framerate " , parameters[2]
+		print "Number of frames " , parameters[3]
+		print "Compression type" , parameters[4]
+		print "Compression name " , parameters[5]
+		print("Reading information....OK.\n")
+		return parameters
+
+	
+	def as_hex(self,af):
+		'''returns the hex representation of a string of audio bytes'''
+		num_frames = af.getnframes()
+		frames = af.readframes(num_frames)	
+		hex_array = binascii.hexlify(frames)
+		return hex_array
+	
+	def compute_rms_power(self,audio,message):
+		'''Compute the rms power for any given audio file'''
+		audio_byte_arr = bytearray.fromhex(audio)
+		ad = ''.join(str(audio_byte_arr))
+		rms = audioop.rms(ad,2)	
+		return rms
+
+
+	def compute_fitness_function(self,baseline_stream,noisy_stream):
+		'''The fitness function used in this simulation is
+		    the Signal\Noise ration.'''
+		return float(baseline_stream)/float(noisy_stream)
+
+	def new_chromosome(self,message,audio):
+		'''Computes a random index to encode information.
+			Used for baseline no AI solution'''
+		key = list()
+		for x in range(0,len(message)):
+			random_index = random.randint(0,len(audio))
+			while random_index in key:
+				random_index = random.randint(0,len(audio))
+			key.append(random_index)
+		chromosome = Chromosome(key,-1)
+		return chromosome
+
+	def init_population(self,audio,pop_size,message):
+		pop_list = list()
+		for x in range(0,pop_size):
+			chromosome = self.new_chromosome(message,audio)
+			pop_list.append(chromosome)
+		return pop_list
+
+	def measure_population(self,audio,message,population,baseline_rms):
+		'''Computes the fitness accross the entire  population
+		 	audio : hex representation of audio
+		 	message : hex representation of text
+		 	population : list of all chromosome objects
+		 	baseline_rms : RMS power without added noise'''
+		fitness = list()
+		for x in range(0,len(population)):
+			curr_chromosome = population[x]
+			audio_info = self.encode(audio,message,curr_chromosome.all_genes())
+			audio_edited = audio_info[0]
+			audio_key = audio_info[1]
+			edited_rms = self.compute_rms_power(audio_edited," ")
+			curr_fitness = self.compute_fitness_function(baseline_rms,edited_rms)
+			curr_chromosome.fitness = curr_fitness
+			fitness.append(curr_fitness)
+		return fitness
+
+	def measure_individual(self,audio,message,individual,baseline_rms):
+		'''Computes the fitness of a given individual'''
+		fitness = list()
+		curr_chromosome = individual
+		audio_info = self.encode(audio,message,curr_chromosome.all_genes())
+		audio_edited = audio_info[0]
+		audio_key = audio_info[1]
+		edited_rms = self.compute_rms_power(audio_edited," ")
+		curr_fitness = self.compute_fitness_function(baseline_rms,edited_rms)
+		curr_chromosome.fitness = curr_fitness
+		return curr_chromosome.fitness
+                    
+                    
+                    </code>
+                </pre>
+            
+            </div>
+            
+            
+                      
+       
+            <h3>Chromosome.py</h3>
+                <pre><code data-language="Python">
+                    import random as random
+class Chromosome:
+	def __init__(self,key,fitness):
+		self.key = key
+		self.fitness = fitness
+
+
+	def mutate(self,amount):
+		''' Mutations add more variation to search space. Randomally iterate through all genes,
+		 randomally selecting genes to mutate (cut value by half) '''
+		for x in range(0,amount):
+				mutate_value = random.randint(0,len(self.key)-1)
+				if mutate_value in self.key:
+					continue
+				else:
+					self.key[mutate_value] = self.key[mutate_value]/2
+
+	def get_gene(self,i):
+		return self.key[i]
+
+	def set_gene(self,i,value):
+		self.key[i] = value
+
+	def all_genes(self):
+		return self.key
+
+	def crossover(self,partner):
+		'''Merge to existing solutions into a new solution.
+		Randomally combines genes from two partners together'''
+		split_point = random.randint(0,len(self.key)-1)
+		begining = self.key[0:split_point]
+		end = partner.key[split_point:len(self.key)]
+		child_key = begining + end
+		return child_key
+                
+                
+                
+                </code></pre>
+            
+            
+            
+            
+            
+            
+        </div>           
+         </div>
+    </div>
+    
+      <script>
+         var mainApp = angular.module("juneja", []);
+    
+    </script>
+</body> 
+    
+    
+</html>
